@@ -13,3 +13,15 @@ Control circuits:
 * Manual switch to trigger laser exposure cycle
 * Potentiometer to test opening and closing of aperture. (When an exposure cycle is kicked off, the aperture will close before turning on the laser.)
 
+**NOTE: For the holgram exposure, you should cover the Arduino blue power LED to eliminate light pollution. Any LEDs that are active during exposure risk spoiling the holographic plate. Alternately, mount the Arduino in a light-protected enclosure.**
+
+Equipment required:
+* Arduino Uno or similar
+* Breadboard or punchhole PCB for wiring up circuits
+* Resistors as marked in circuit diagram
+* [Holography red diode laser](https://www.integraf.com/shop/holography-laser)
+* Holographic kit (not covered in detail here)
+* Push button switch
+* Servo motor
+* (optional) Potentiometer
+
