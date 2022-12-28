@@ -1,5 +1,23 @@
 #include <Servo.h>
 
+/* Control software for Arduino designed for holographic plate exposure control.
+ *
+ * Behaviour:
+ * Note: in any state other than idle state (SYSTEM_IDLE), a long button press turns off the laser and closes the aperture. (See longButtonPressDurationMilliSeconds.)
+ * - Starts in idle state (SYSTEM_IDLE: laser off, awaiting first button press). While idle, servo calibration can be performed to ensure laser aperture is properly blocked (while the laser is off).
+ * - Upon first button press, enters laser warmup state (LASER_WARMUP: aperture closed). Stays in this state for a minimum of laserWarmUpTimeMilliSeconds.
+ *   Additional button presses prior to this are ignored. Inbuilt LED flashes to indicate laser warmup in progress.
+ *   After warmup complete, inbuilt LED flashing stops and system automatically progresses to laser ready state (LASER_READY).
+ * - In laser ready state (LASER_READY), awaits next button press to initiate an exposure.
+ * - When button pressed (not held) in laser ready state (LASER_READY), initiates an exposure. This starts by entering APERTURE_OPENING state until the aperture is open,
+ *   then automatically progresses to LASER_EXPOSURE state.
+ * - In LASER_EXPOSURE state, exposure will end upon a single button press, or when the exposure times out. (See maxExposureTimeMilliSeconds.)
+ * - When exposure ends, laser is immediately turned off (LASER_OFF state), then immediately progresses to APERTURE_CLOSING state.
+ * - In APERTURE_CLOSING state, the aperture is returned to the closed position (a time allowance is made, since we can't read the servo position).
+ *   Once the time-allowance for aperture closure has passed, the laser automatically returns to the LASER_WARMUP state in preparation for the next exposure.
+ * - When you wish to turn the system off (i.e, return to SYSTEM_IDLE state), press and long-hold the button to turn off laser and return to idle. (See longButtonPressDurationMilliSeconds.)
+ */
+
 // constants won't change. They're used here to set pin numbers:
 const int buttonPin = 2;  // the number of the pushbutton pin
 const int ledPin = 13;    // the number of the LED pin
@@ -9,6 +27,9 @@ const int servoPwmPin = 11;
 const int servoNeutralAngle = 90;
 const int servoOpenAngle = 90 + 60;
 const int potNoiseVariance = 2;
+const int laserWarmUpTimeMilliSeconds = 5 * 60 * 1000; // 5 minutes
+const int longButtonPressDurationMilliSeconds = 1000; // 1 sec button hold is interpreted as a long button press
+const int maxExposureTimeMilliSeconds = 30 * 1000;
 
 // Input variables
 int buttonState = 0;  // variable for reading the pushbutton status
@@ -28,19 +49,26 @@ unsigned long lastTime;
 const bool mirrorInbuiltLed = false;
 const bool servoTestMode = false;
 
-// enum SystemState
-// {
-//   UNDEFINED = 0,
-//   WAITING_INPUT,
-//   INITIALIZING,
-//   LASER_WARMUP,
-//   APERTURE_OPENING,
-//   LASER_EXPOSURE,
-//   LASER_OFF,
-//   APERTURE_CLOSING
-// };
+enum class SystemState
+{
+  SYSTEM_IDLE = 0,
+  LASER_WARMUP,
+  LASER_READY,
+  APERTURE_OPENING,
+  LASER_EXPOSURE,
+  LASER_OFF,
+  APERTURE_CLOSING
+};
 
-// SystemState systemState = UNDEFINED;
+SystemState systemState = SystemState::SYSTEM_IDLE;
+
+void updateSystemIdle(unsigned long timeMillis);
+void updateLaserWarmUp(unsigned long timeMillis);
+void updateLaserReady(unsigned long timeMillis);
+void updateApertureOpening(unsigned long timeMillis);
+void updateLaserExposure(unsigned long timeMillis);
+void updateLaserOff(unsigned long timeMillis);
+void updateAperturnClosing(unsigned long timeMillis);
 
 void setup() 
 {
@@ -69,15 +97,17 @@ void setup()
 
 void loop() 
 {
+  unsigned long thisTimeMillis = millis();
+
   // read the state of the pushbutton value:
   buttonState = digitalRead(buttonPin);
 
   bool doServoUpdate = false;
 
   const int buttonRepeatDelayMs = 500;
-  if (buttonState != lastButtonState && millis() > lastTime + buttonRepeatDelayMs)
+  if (buttonState != lastButtonState && thisTimeMillis > lastTime + buttonRepeatDelayMs)
   {
-    lastTime = millis();
+    lastTime = thisTimeMillis;
     
     // Flip LED/LASER state
     if (ledState == HIGH) 
@@ -134,4 +164,39 @@ void loop()
 
   // Limit loop refresh rate to 20 Hz
   delay(50);
+}
+
+void updateSystemIdle(unsigned long timeMillis)
+{
+
+}
+
+void updateLaserWarmUp(unsigned long timeMillis)
+{
+
+}
+
+void updateLaserReady(unsigned long timeMillis)
+{
+
+}
+
+void updateApertureOpening(unsigned long timeMillis)
+{
+
+}
+
+void updateLaserExposure(unsigned long timeMillis)
+{
+
+}
+
+void updateLaserOff(unsigned long timeMillis)
+{
+
+}
+
+void updateAperturnClosing(unsigned long timeMillis)
+{
+
 }
